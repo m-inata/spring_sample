@@ -14,4 +14,9 @@ public class HelloController {
 	public String getMyloc() {
 		return "myloc";
 	}
+	
+	@GetMapping("/random")
+	public String getRandom() {
+		return "random";
+	}
 }
