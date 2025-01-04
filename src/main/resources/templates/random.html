@@ -8,6 +8,8 @@
 <script>
 	let map;
 	let layerGroup;
+	const points = [];
+	
     function init() {
       //地図を表示するdiv要素のidを設定
       map = L.map('mapcontainer');
@@ -21,15 +23,13 @@
       L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
           attribution: "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>地理院タイル</a>"
       }).addTo(map);
-      //東京タワーと浜松町駅のマーカーを追加
+      //東京タワーのマーカーを追加
       L.marker(pt_tokyo_tower,{title:"東京タワー"}).addTo(layerGroup);
+      points.push({lat: pt_tokyo_tower[0], lng: pt_tokyo_tower[1]});
 
       map.on('click', onMapClick);
     }
 
-    function onMapClick(e) {
-        console.log(e.latlng);
-    }
     
 </script>
 </head>
@@ -44,9 +44,37 @@
     <div>
 		<button type="button" id="random">ランダム経路の取得</button>
 	</div>
+	<div>
+		<button type="button" id="clear_route">経路のクリア</button>
+	</div>
+	<div>
+		<button type="button" id="add_route">経路の追加</button>
+	</div>
     <div id="mapcontainer" style="width:600px;height:600px"></div>
 
 <script>
+	function onMapClick(e) {
+		let prev;
+		if (points.length != 0) {
+			prev = points[points.length - 1];
+		}
+        console.log(e.latlng);
+        p = {};
+        p.lat = e.latlng.lat;
+        p.lng = e.latlng.lng;
+        points.push(p);
+        
+        L.marker([p.lat, p.lng],{title:""}).addTo(layerGroup);
+        if (prev !== undefined) {
+			L.polyline([prev, p], { color: 'blue', weight: 5 }).addTo(layerGroup);
+		}
+    }
+    
+    document.getElementById("clear_route").onclick = function () {
+		layerGroup.clearLayers();
+		points.splice(0);	//全要素を削除
+	}
+
 	document.getElementById("random").onclick = function () {
 		layerGroup.clearLayers();
         fetch('http://localhost:8080/rest/random_route')
